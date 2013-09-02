@@ -1,7 +1,8 @@
 (function(window, location, undef) {
   var root   = location.protocol + "//" + location.host,
-      apiKey = window.AIRBRAKE_API_KEY,
-      env    = window.AIRBRAKE_ENVIRONMENT || "production";
+      apiKey = window.ConveadClient.AIRBRAKE_API_KEY,
+      env    = window.ConveadClient.AIRBRAKE_ENVIRONMENT || "production",
+      url    = window.ConveadClient.AIRBRAKE_URL || "http://airbrake.io";
 
   function xmlNode(nodeName, attributes, nodeValue) {
     attributes = attributes ? " " + attributes : "";
@@ -22,7 +23,7 @@
               xmlNode("notifier", undef,
                 xmlNode("name",     undef, "Airbrake Notifier")   +
                 xmlNode("version",  undef, "1.2.4")                 +
-                xmlNode("url",      undef, "http://airbrake.io")
+                xmlNode("url",      undef, url)
               ) +
               xmlNode("error",    undef,
                 xmlNode("class",      undef, "Error")    +
@@ -45,9 +46,15 @@
             );
   }
 
-  window.onerror = (window.Airbrake = {}).notify = function(message, file, line) {
+  var prev_err_handler = window.onerror;
+
+  window.ConveadClient || (window.ConveadClient = {});
+  window.onerror = window.ConveadClient.error_notify = function(message, file, line) {
     if (apiKey) {
-      new Image().src = "http://airbrake.io/notifier_api/v2/notices?data=" + encodeURIComponent(getXML(message, file, line));
+      new Image().src = url + "/notifier_api/v2/notices?data=" + encodeURIComponent(getXML(message, file, line));
+    }
+    if (typeof prev_err_handler == "function") {
+      prev_err_handler(arguments);
     }
   };
 })(this, location);
