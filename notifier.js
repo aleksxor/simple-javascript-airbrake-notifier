@@ -49,7 +49,7 @@
   var prev_err_handler = window.onerror;
 
   window.ConveadClient || (window.ConveadClient = {});
-  window.onerror = window.ConveadClient.error_notify = function(message, file, line) {
+  window.ConveadClient.error_notify = function(message, file, line) {
     if (apiKey) {
       new Image().src = url + "/notifier_api/v2/notices?data=" + encodeURIComponent(getXML(message, file, line));
     }
